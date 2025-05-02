@@ -6,6 +6,7 @@ import Hero from "@/components/Hero";
 import SearchFilters from "@/components/SearchFilters";
 import FoodListingCard from "@/components/FoodListingCard";
 import CreateListingForm from "@/components/CreateListingForm";
+import ListingDetailModal from "@/components/ListingDetailModal";
 import { FoodListing, PaginatedResult } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -13,6 +14,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedListing, setSelectedListing] = useState<FoodListing | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [searchParams, setSearchParams] = useState({
     query: "",
     category: "",
@@ -66,6 +69,19 @@ export default function Home() {
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
+  
+  // Handle opening detail modal
+  const handleOpenDetailModal = (listing: FoodListing) => {
+    setSelectedListing(listing);
+    setIsDetailModalOpen(true);
+  };
+  
+  // Handle closing detail modal
+  const handleCloseDetailModal = () => {
+    setIsDetailModalOpen(false);
+    // Clear the selected listing after animation completes
+    setTimeout(() => setSelectedListing(null), 300);
+  };
   
   return (
     <div className="flex flex-col min-h-screen">

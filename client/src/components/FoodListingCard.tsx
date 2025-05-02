@@ -1,4 +1,4 @@
-import { MapPin, Clock, Mail, Phone, ImageOff } from "lucide-react";
+import { MapPin, Clock, User, ImageOff } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FoodListing, foodCategories } from "@shared/schema";
@@ -6,9 +6,10 @@ import { useState } from "react";
 
 interface FoodListingCardProps {
   listing: FoodListing;
+  onClick: (listing: FoodListing) => void;
 }
 
-export default function FoodListingCard({ listing }: FoodListingCardProps) {
+export default function FoodListingCard({ listing, onClick }: FoodListingCardProps) {
   const [imageError, setImageError] = useState(false);
   // Format creation date
   const formatDate = (dateString: Date) => {
@@ -52,7 +53,10 @@ export default function FoodListingCard({ listing }: FoodListingCardProps) {
   };
   
   return (
-    <Card className="overflow-hidden transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
+    <Card 
+      className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+      onClick={() => onClick(listing)}
+    >
       {listing.imageUrl && !imageError ? (
         <div className="w-full h-48 overflow-hidden relative bg-muted">
           <img 
@@ -86,29 +90,22 @@ export default function FoodListingCard({ listing }: FoodListingCardProps) {
           <span className="group-hover:text-foreground transition-colors">{listing.location}</span>
         </div>
         
-        <div className="flex items-center text-sm text-muted-foreground mb-5 group">
+        <div className="flex items-center text-sm text-muted-foreground mb-3 group">
           <Clock className="h-4 w-4 mr-2 text-primary/70 group-hover:text-primary transition-colors" />
           <span className="group-hover:text-foreground transition-colors">{formatDate(listing.createdAt)}</span>
         </div>
         
-        <div className="border-t border-border pt-4">
-          <h4 className="font-display font-semibold text-foreground mb-3">Contact Info:</h4>
-          
-          <div className="flex items-center mb-3 group">
-            <Mail className="h-4 w-4 mr-2 text-primary/70 group-hover:text-primary transition-colors" />
-            <a href={`mailto:${listing.email}`} className="text-primary hover:text-primary-dark hover:underline transition-colors">
-              {listing.email}
-            </a>
+        <div className="flex items-center text-sm text-muted-foreground group">
+          <User className="h-4 w-4 mr-2 text-primary/70 group-hover:text-primary transition-colors" />
+          <span className="group-hover:text-foreground transition-colors">{listing.name}</span>
+        </div>
+        
+        <div className="mt-4 pt-4 border-t border-border">
+          <div className="text-center">
+            <span className="text-primary hover:text-primary-dark font-medium">
+              Click for contact details
+            </span>
           </div>
-          
-          {listing.phone && (
-            <div className="flex items-center group">
-              <Phone className="h-4 w-4 mr-2 text-primary/70 group-hover:text-primary transition-colors" />
-              <a href={`tel:${listing.phone}`} className="text-primary hover:text-primary-dark hover:underline transition-colors">
-                {listing.phone}
-              </a>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
