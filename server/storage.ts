@@ -45,25 +45,34 @@ export const storage = {
     }
     
     // Get total count with applied filters
-    const countQuery = db.select({ value: count() }).from(foodListings);
+    let countResult;
     if (conditions) {
-      countQuery.where(conditions);
+      countResult = await db.select({ value: count() })
+        .from(foodListings)
+        .where(conditions);
+    } else {
+      countResult = await db.select({ value: count() }).from(foodListings);
     }
     
-    const [countResult] = await countQuery;
-    const totalItems = countResult ? countResult.value : 0;
+    const totalItems = countResult[0] ? countResult[0].value : 0;
     const totalPages = Math.ceil(totalItems / limit);
     
     // Get data with pagination and filters
-    const dataQuery = db.select().from(foodListings);
+    let data;
     if (conditions) {
-      dataQuery.where(conditions);
+      data = await db.select()
+        .from(foodListings)
+        .where(conditions)
+        .orderBy(desc(foodListings.createdAt))
+        .limit(limit)
+        .offset(offset);
+    } else {
+      data = await db.select()
+        .from(foodListings)
+        .orderBy(desc(foodListings.createdAt))
+        .limit(limit)
+        .offset(offset);
     }
-    
-    const data = await dataQuery
-      .orderBy(desc(foodListings.createdAt))
-      .limit(limit)
-      .offset(offset);
     
     // Return paginated result
     return {
