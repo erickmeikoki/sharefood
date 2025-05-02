@@ -57,16 +57,31 @@ export default function FoodListingCard({ listing, onClick }: FoodListingCardPro
       className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer"
       onClick={() => onClick(listing)}
     >
-      {listing.imageUrl && !imageError ? (
+      {/* Display the first image from imageUrls if available, otherwise fall back to imageUrl */}
+      {(
+        ((listing.imageUrls && listing.imageUrls.length > 0 && listing.imageUrls[0]) || 
+        listing.imageUrl) ? true : false
+      ) && !imageError ? (
         <div className="w-full h-48 overflow-hidden relative bg-muted">
           <img 
-            src={listing.imageUrl} 
+            src={
+              (listing.imageUrls && listing.imageUrls.length > 0) 
+                ? listing.imageUrls[0] 
+                : (listing.imageUrl || '')
+            } 
             alt={listing.title} 
             className="w-full h-full object-cover"
             onError={() => setImageError(true)}
             loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+          
+          {/* Show indicator when there are multiple images */}
+          {listing.imageUrls && listing.imageUrls.length > 1 && (
+            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+              +{listing.imageUrls.length - 1} more
+            </div>
+          )}
         </div>
       ) : (
         <div className="w-full h-48 bg-muted flex flex-col items-center justify-center">
