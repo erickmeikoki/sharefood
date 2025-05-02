@@ -11,28 +11,36 @@ import { eq, and, desc, asc, ilike, or, count, sql } from "drizzle-orm";
 export const storage = {
   // Create a new food listing
   async createFoodListing(listing: InsertFoodListing): Promise<FoodListing> {
+    // Create a copy of the listing to work with
+    const insertData = { ...listing };
+    
     // Ensure imageUrls is properly handled
-    if (!listing.imageUrls) {
+    if (!insertData.imageUrls) {
       // If no imageUrls, set as empty array
-      listing.imageUrls = [];
+      insertData.imageUrls = [];
     }
     
-    if (listing.imageUrl && !listing.imageUrls.includes(listing.imageUrl)) {
-      // If imageUrl exists but not in imageUrls, add it to the array
-      listing.imageUrls.push(listing.imageUrl);
+    // Make sure imageUrls is always an array
+    const imageUrlsArray = Array.isArray(insertData.imageUrls) ? 
+      [...insertData.imageUrls] : 
+      [];
+    
+    // If imageUrl exists but not in imageUrls, add it to the array
+    if (insertData.imageUrl && !imageUrlsArray.includes(insertData.imageUrl)) {
+      imageUrlsArray.push(insertData.imageUrl);
     }
     
     const [newListing] = await db.insert(foodListings)
       .values({
-        title: listing.title,
-        description: listing.description,
-        category: listing.category,
-        location: listing.location,
-        name: listing.name,
-        email: listing.email,
-        phone: listing.phone,
-        imageUrl: listing.imageUrl,
-        imageUrls: listing.imageUrls
+        title: insertData.title,
+        description: insertData.description,
+        category: insertData.category,
+        location: insertData.location,
+        name: insertData.name,
+        email: insertData.email,
+        phone: insertData.phone,
+        imageUrl: insertData.imageUrl,
+        imageUrls: imageUrlsArray
       })
       .returning();
     
