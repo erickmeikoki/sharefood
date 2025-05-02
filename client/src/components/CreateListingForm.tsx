@@ -48,6 +48,7 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
       description: "",
       category: "",
       location: "",
+      name: "",
       email: "",
       phone: "",
       imageUrl: ""
@@ -383,6 +384,20 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                     This allows interested people to reach out about the food you're sharing.
                   </p>
                 </div>
+                
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Your Name*</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Full Name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
                 <FormField
                   control={form.control}
