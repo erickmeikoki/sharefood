@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
-import SearchFilters from "@/components/SearchFilters";
+import SearchFilters, { SortOption } from "@/components/SearchFilters";
 import FoodListingCard from "@/components/FoodListingCard";
 import CreateListingForm from "@/components/CreateListingForm";
 import ListingDetailModal from "@/components/ListingDetailModal";
@@ -20,7 +20,8 @@ export default function Home() {
     query: "",
     category: "",
     page: 1,
-    limit: 9 // Show 9 items per page (3x3 grid)
+    limit: 9, // Show 9 items per page (3x3 grid)
+    sortBy: "" // Default sorting (by id)
   });
 
   // Fetch food listings with search params
@@ -30,7 +31,8 @@ export default function Home() {
       searchParams.query, 
       searchParams.category,
       searchParams.page,
-      searchParams.limit
+      searchParams.limit,
+      searchParams.sortBy
     ],
     queryFn: async () => {
       // Build URL with search params
@@ -42,6 +44,10 @@ export default function Home() {
       
       if (searchParams.category) {
         url.searchParams.append("category", searchParams.category);
+      }
+      
+      if (searchParams.sortBy) {
+        url.searchParams.append("sortBy", searchParams.sortBy);
       }
       
       url.searchParams.append("page", searchParams.page.toString());
@@ -83,6 +89,11 @@ export default function Home() {
     setTimeout(() => setSelectedListing(null), 300);
   };
   
+  // Handle sort change
+  const handleSortChange = (sortOption: SortOption) => {
+    setSearchParams(prev => ({ ...prev, sortBy: sortOption }));
+  };
+  
   return (
     <div className="flex flex-col min-h-screen">
       <Header onCreateClick={handleOpenModal} />
@@ -99,6 +110,7 @@ export default function Home() {
             setSearchParams(prev => ({ ...prev, category, page: 1 })); // Reset to page 1 when category changes
             setCurrentPage(1);
           }}
+          onSortChange={handleSortChange}
         />
         
         <section className="mb-12">

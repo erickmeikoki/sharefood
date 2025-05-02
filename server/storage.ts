@@ -6,7 +6,7 @@ import {
   type SearchParams,
   type PaginatedResult
 } from "@shared/schema";
-import { eq, and, desc, ilike, or, count, sql } from "drizzle-orm";
+import { eq, and, desc, asc, ilike, or, count, sql } from "drizzle-orm";
 
 export const storage = {
   // Create a new food listing
@@ -58,21 +58,39 @@ export const storage = {
     const totalPages = Math.ceil(totalItems / limit);
     
     // Get data with pagination and filters
-    let data;
+    let query = db.select().from(foodListings);
+    
+    // Apply conditions if any
     if (conditions) {
-      data = await db.select()
-        .from(foodListings)
-        .where(conditions)
-        .orderBy(desc(foodListings.createdAt))
-        .limit(limit)
-        .offset(offset);
-    } else {
-      data = await db.select()
-        .from(foodListings)
-        .orderBy(desc(foodListings.createdAt))
-        .limit(limit)
-        .offset(offset);
+      query = query.where(conditions);
     }
+    
+    // Apply sorting
+    if (params.sortBy) {
+      switch(params.sortBy) {
+        case 'newest':
+          query = query.orderBy(desc(foodListings.createdAt));
+          break;
+        case 'oldest':
+          query = query.orderBy(asc(foodListings.createdAt));
+          break;
+        case 'alphabetical':
+          query = query.orderBy(asc(foodListings.title));
+          break;
+        default:
+          // Default sort by newest
+          query = query.orderBy(desc(foodListings.createdAt));
+      }
+    } else {
+      // Default sort by newest
+      query = query.orderBy(desc(foodListings.createdAt));
+    }
+    
+    // Apply pagination
+    query = query.limit(limit).offset(offset);
+    
+    // Execute query
+    const data = await query;
     
     // Return paginated result
     return {

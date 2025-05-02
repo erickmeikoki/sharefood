@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { Search, ArrowUpDown, SortAsc } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { foodCategories } from "@shared/schema";
 
+export type SortOption = 'newest' | 'oldest' | 'alphabetical' | 'default';
+
 interface SearchFiltersProps {
   onSearch: (query: string) => void;
   onCategoryChange: (category: string) => void;
+  onSortChange?: (sortOption: SortOption) => void;
 }
 
-export default function SearchFilters({ onSearch, onCategoryChange }: SearchFiltersProps) {
+export default function SearchFilters({ onSearch, onCategoryChange, onSortChange }: SearchFiltersProps) {
   const [searchQuery, setSearchQuery] = useState("");
   
   // Debounce search input
@@ -37,7 +40,7 @@ export default function SearchFilters({ onSearch, onCategoryChange }: SearchFilt
           </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Select onValueChange={onCategoryChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="All Categories" />
@@ -51,6 +54,43 @@ export default function SearchFilters({ onSearch, onCategoryChange }: SearchFilt
               ))}
             </SelectContent>
           </Select>
+
+          {/* Sort Options */}
+          {onSortChange && (
+            <Select
+              onValueChange={(value) => onSortChange(value as SortOption)}
+              defaultValue="default"
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">
+                  <div className="flex items-center">
+                    <span>Default</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="newest">
+                  <div className="flex items-center">
+                    <ArrowUpDown className="h-4 w-4 mr-2 rotate-180" />
+                    <span>Newest First</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="oldest">
+                  <div className="flex items-center">
+                    <ArrowUpDown className="h-4 w-4 mr-2" />
+                    <span>Oldest First</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="alphabetical">
+                  <div className="flex items-center">
+                    <SortAsc className="h-4 w-4 mr-2" />
+                    <span>A-Z</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
     </section>

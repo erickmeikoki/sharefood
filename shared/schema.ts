@@ -66,6 +66,7 @@ export type SearchParams = {
   category?: string;
   page?: number;
   limit?: number;
+  sortBy?: string; // sorting option: 'newest', 'oldest', 'alphabetical'
 };
 
 // Pagination result type
