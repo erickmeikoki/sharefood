@@ -23,7 +23,9 @@ export default function SearchFilters({
   onFavoritesChange
 }: SearchFiltersProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  // Track favorites toggle state locally
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  // Get favorites data from hook
   const { favorites, favoriteIds } = useFavorites();
   
   // Debounce search input
@@ -37,16 +39,12 @@ export default function SearchFilters({
   
   // Handle favorites filter toggle
   const handleFavoritesToggle = (checked: boolean) => {
+    console.log('Toggling favorites filter to:', checked);
     setShowFavoritesOnly(checked);
     if (onFavoritesChange) {
       onFavoritesChange(checked);
     }
   };
-  
-  // For debugging
-  useEffect(() => {
-    console.log("Favorites in SearchFilters:", favoriteIds);
-  }, [favoriteIds]);
   
   return (
     <section className="mb-8 bg-card p-4 rounded-lg shadow-sm">

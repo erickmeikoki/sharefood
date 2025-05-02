@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -18,7 +18,7 @@ export default function Home() {
   const [selectedListing, setSelectedListing] = useState<FoodListing | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const { favorites, isFavorite } = useFavorites();
+  const { favorites, favoriteIds, isFavorite } = useFavorites(); // Get favoriteIds directly
   const [searchParams, setSearchParams] = useState({
     query: "",
     category: "",
@@ -63,21 +63,32 @@ export default function Home() {
   // Extract listings and pagination meta data
   const allListings = paginatedResult?.data || [];
   
+  // Debug favorites
+  useEffect(() => {
+    console.log("Favorites changed:", favorites);
+    console.log("Favorites toggle state:", showFavoritesOnly);
+  }, [favorites, showFavoritesOnly]);
+  
   // Filter listings by favorites if needed
   const listings = useMemo(() => {
-    console.log("Filtering listings. showFavoritesOnly:", showFavoritesOnly, "favoriteIds:", favorites.map(f => f.id));
-    
     if (showFavoritesOnly) {
       // Get the IDs of favorite listings
-      const favIds = favorites.map(fav => fav.id);
-      console.log("Filtering by favorites, have", favIds.length, "favorites");
+      const favIds = favoriteIds;
+      const filtered = allListings.filter(listing => favIds.includes(listing.id));
       
-      // Return only listings that are in favorites
-      return allListings.filter(listing => favIds.includes(listing.id));
+      console.log("FILTERING BY FAVORITES:", {
+        showFavoritesOnly,
+        favoritesCount: favoriteIds.length,
+        beforeFilterCount: allListings.length,
+        afterFilterCount: filtered.length,
+        favoriteIds
+      });
+      
+      return filtered;
     }
     
     return allListings;
-  }, [allListings, showFavoritesOnly, favorites]);
+  }, [allListings, showFavoritesOnly, favoriteIds]);
   
   // Calculate pagination based on filtered results
   const pagination = useMemo(() => {
