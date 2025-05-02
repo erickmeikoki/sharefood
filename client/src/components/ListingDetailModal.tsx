@@ -190,7 +190,15 @@ export default function ListingDetailModal({ listing, isOpen, onClose }: Listing
               
               {/* Favorite button */}
               <button 
-                onClick={(e) => { e.stopPropagation(); toggleFavorite(listing); }}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  console.log('Adding/removing favorite:', listing.id, 'Current state:', isFavorite(listing.id));
+                  toggleFavorite(listing);
+                  // Log after toggling
+                  setTimeout(() => {
+                    console.log('After toggle, favorite status:', isFavorite(listing.id));
+                  }, 10);
+                }}
                 className={`rounded-full ${isFavorite(listing.id) ? 'bg-primary text-white' : 'bg-black/50 text-white/70'} p-2 hover:text-white hover:bg-black/70 transition-colors`}
                 aria-label={isFavorite(listing.id) ? "Remove from favorites" : "Add to favorites"}
               >
@@ -250,7 +258,14 @@ export default function ListingDetailModal({ listing, isOpen, onClose }: Listing
               
               {/* Favorite button */}
               <button 
-                onClick={(e) => { e.stopPropagation(); toggleFavorite(listing); }}
+                onClick={(e) => { 
+                  e.stopPropagation();
+                  console.log('Adding/removing favorite (no image):', listing.id);
+                  toggleFavorite(listing);
+                  setTimeout(() => {
+                    console.log('After toggle (no image), favorite status:', isFavorite(listing.id));
+                  }, 10);
+                }}
                 className={`rounded-full p-1.5 shadow-sm border border-border ${isFavorite(listing.id) ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground'}`}
                 aria-label={isFavorite(listing.id) ? "Remove from favorites" : "Add to favorites"}
               >
