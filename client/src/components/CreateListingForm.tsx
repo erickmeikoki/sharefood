@@ -35,10 +35,13 @@ interface CreateListingFormProps {
 
 export default function CreateListingForm({ isOpen, onClose }: CreateListingFormProps) {
   const { toast } = useToast();
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Hidden form field for image URLs array
+  const [imageUrlsField, setImageUrlsField] = useState<string[]>([]);
 
   // Initialize form with validation schema
   const form = useForm<z.infer<typeof foodListingFormSchema>>({
@@ -74,8 +77,18 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
       return response.json();
     },
     onSuccess: (data) => {
-      setUploadedImage(data.imageUrl);
-      form.setValue("imageUrl", data.imageUrl);
+      // Add the new image URL to the array of uploaded images
+      const newImages = [...uploadedImages, data.imageUrl];
+      setUploadedImages(newImages);
+      
+      // Set the first image as the main imageUrl for backward compatibility
+      if (newImages.length === 1) {
+        form.setValue("imageUrl", data.imageUrl);
+      }
+      
+      // Set the full array of images
+      form.setValue("imageUrls", newImages);
+      
       setIsUploading(false);
       setUploadError(null);
     },
@@ -90,6 +103,12 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    
+    // Limit to maximum 5 images
+    if (uploadedImages.length >= 5) {
+      setUploadError("Maximum 5 images allowed per listing");
+      return;
+    }
     
     // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
@@ -108,6 +127,23 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
     setUploadError(null);
     uploadImageMutation.mutate(file);
   };
+  
+  // Remove an image
+  const removeImage = (index: number) => {
+    const newImages = [...uploadedImages];
+    newImages.splice(index, 1);
+    setUploadedImages(newImages);
+    
+    if (newImages.length === 0) {
+      // If no images left, clear imageUrl
+      form.setValue("imageUrl", "");
+      form.setValue("imageUrls", []);
+    } else {
+      // Otherwise update the main imageUrl to be the first remaining image
+      form.setValue("imageUrl", newImages[0]);
+      form.setValue("imageUrls", newImages);
+    }
+  };
 
   // Create food listing mutation
   const createListingMutation = useMutation({
@@ -118,7 +154,7 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
     onSuccess: () => {
       // Reset form and close modal
       form.reset();
-      setUploadedImage(null);
+      setUploadedImages([]);
       onClose();
       
       // Show success message
@@ -258,30 +294,48 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                     
                     {/* Image Preview or Upload Area */}
                     <div className="mt-2">
-                      {uploadedImage ? (
-                        <div className="relative w-full h-56 bg-muted rounded-lg overflow-hidden shadow-sm border border-border/40">
-                          <img 
-                            src={uploadedImage} 
-                            alt="Food preview" 
-                            className="w-full h-full object-cover"
-                            onError={() => {
-                              setUploadError("Image failed to load. Please try another URL or upload a different image.");
-                              setUploadedImage(null);
-                              form.setValue("imageUrl", "");
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-                          <button
-                            type="button"
-                            className="absolute top-3 right-3 bg-card p-1.5 rounded-full shadow-md border border-border hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                            onClick={() => {
-                              setUploadedImage(null);
-                              form.setValue("imageUrl", "");
-                              setUploadError(null);
-                            }}
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
+                      {/* Display image previews if available */}
+                      {uploadedImages.length > 0 ? (
+                        <div className="space-y-3">
+                          {/* Image previews */}
+                          <div className="grid grid-cols-2 gap-2 mb-2">
+                            {uploadedImages.map((imageUrl, index) => (
+                              <div key={index} className="relative bg-muted rounded-lg overflow-hidden shadow-sm border border-border/40 aspect-square">
+                                <img 
+                                  src={imageUrl} 
+                                  alt={`Food preview ${index + 1}`} 
+                                  className="w-full h-full object-cover"
+                                  onError={() => {
+                                    setUploadError(`Image ${index + 1} failed to load.`);
+                                    removeImage(index);
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  className="absolute top-2 right-2 bg-card p-1.5 rounded-full shadow-md border border-border hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                                  onClick={() => removeImage(index)}
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                            ))}
+                            
+                            {/* Add more images button (if less than 5) */}
+                            {uploadedImages.length < 5 && (
+                              <div 
+                                className="border-2 border-dashed border-border hover:border-primary/50 bg-card hover:bg-muted/50 rounded-lg p-4 text-center cursor-pointer transition-colors duration-200 aspect-square flex flex-col items-center justify-center"
+                                onClick={() => fileInputRef.current?.click()}
+                              >
+                                <div className="bg-primary/10 p-2 rounded-full mb-2">
+                                  <Image className="h-6 w-6 text-primary" />
+                                </div>
+                                <p className="text-sm font-medium">Add more photos</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {5 - uploadedImages.length} remaining
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ) : (
                         <div 
@@ -300,13 +354,13 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                                 <Image className="h-10 w-10 text-primary" />
                               </div>
                               <p className="text-foreground font-medium">
-                                Add a photo of your food
+                                Add photos of your food
                               </p>
                               <p className="text-muted-foreground text-sm mt-2 max-w-xs">
                                 Photos help others see what you're sharing and increases the chance of your food being claimed
                               </p>
                               <p className="text-xs text-muted-foreground mt-3 bg-muted px-2 py-1 rounded-md">
-                                JPG, PNG, WebP up to 5MB
+                                JPG, PNG, WebP up to 5MB (max 5 images)
                               </p>
                             </div>
                           )}
@@ -322,7 +376,7 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                     )}
                     
                     {/* Manual URL Input Option */}
-                    {!uploadedImage && !isUploading && (
+                    {uploadedImages.length === 0 && !isUploading && (
                       <div className="mt-3">
                         <div className="flex items-center">
                           <div className="h-px flex-1 bg-border"></div>
@@ -344,7 +398,10 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                                 setUploadError(null);
                                 
                                 if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
-                                  setUploadedImage(url);
+                                  // Add the URL to the array of images
+                                  const newImages = [...uploadedImages, url];
+                                  setUploadedImages(newImages);
+                                  form.setValue("imageUrls", newImages);
                                 } else if (url) {
                                   setUploadError("Please enter a valid image URL starting with http:// or https://");
                                 }
