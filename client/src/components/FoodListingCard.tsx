@@ -1,13 +1,15 @@
-import { MapPin, Clock, Mail, Phone } from "lucide-react";
+import { MapPin, Clock, Mail, Phone, ImageOff } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FoodListing, foodCategories } from "@shared/schema";
+import { useState } from "react";
 
 interface FoodListingCardProps {
   listing: FoodListing;
 }
 
 export default function FoodListingCard({ listing }: FoodListingCardProps) {
+  const [imageError, setImageError] = useState(false);
   // Format creation date
   const formatDate = (dateString: Date) => {
     const date = new Date(dateString);
