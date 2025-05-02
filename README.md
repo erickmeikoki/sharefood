@@ -4,7 +4,7 @@
 ShareFood is a community-driven food sharing platform that simplifies local food redistribution through innovative and user-friendly technology. This platform allows users to quickly share surplus food with their local community, reducing food waste and fostering community connections.
 
 ## Live Demo
-🌐 **Deployed Application:** [https://sharefood.replit.app](https://sharefood.replit.app)
+🌐 **Deployed Application:** [https://food-share-app.replit.app/)
 
 ## Key Features
 - **No Authentication Required**: Simple, accessible interface with no login barriers
