@@ -65,11 +65,19 @@ export default function Home() {
   
   // Filter listings by favorites if needed
   const listings = useMemo(() => {
-    if (showFavoritesOnly && favorites.length > 0) {
-      return allListings.filter(listing => isFavorite(listing.id));
+    console.log("Filtering listings. showFavoritesOnly:", showFavoritesOnly, "favoriteIds:", favorites.map(f => f.id));
+    
+    if (showFavoritesOnly) {
+      // Get the IDs of favorite listings
+      const favIds = favorites.map(fav => fav.id);
+      console.log("Filtering by favorites, have", favIds.length, "favorites");
+      
+      // Return only listings that are in favorites
+      return allListings.filter(listing => favIds.includes(listing.id));
     }
+    
     return allListings;
-  }, [allListings, showFavoritesOnly, favorites, isFavorite]);
+  }, [allListings, showFavoritesOnly, favorites]);
   
   // Calculate pagination based on filtered results
   const pagination = useMemo(() => {
