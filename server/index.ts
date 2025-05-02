@@ -1,10 +1,34 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import fileUpload from "express-fileupload";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
+
+// Get directory path for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, "..", "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(fileUpload({
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max file size
+  useTempFiles: true,
+  tempFileDir: path.join(__dirname, "..", "tmp"),
+  createParentPath: true,
+  abortOnLimit: true,
+}));
+
+// Serve static files from uploads directory
+app.use("/uploads", express.static(uploadsDir));
 
 app.use((req, res, next) => {
   const start = Date.now();
