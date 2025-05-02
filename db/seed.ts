@@ -19,6 +19,7 @@ async function seed() {
           description: "Extra vegetables from my garden harvest including tomatoes, cucumbers, and zucchini.",
           category: "fresh",
           location: "Mission District, San Francisco",
+          name: "Maria Garcia",
           email: "maria@example.com",
           phone: "(555) 123-4567",
           imageUrl: "https://images.unsplash.com/photo-1576021182211-9ea8dced3690?ixlib=rb-1.2.1&auto=format&fit=crop&w=640&h=360&q=80"
@@ -28,6 +29,7 @@ async function seed() {
           description: "Freshly baked sourdough bread. Made too much for my family. 3 loaves available.",
           category: "baked",
           location: "Noe Valley, San Francisco",
+          name: "James Johnson",
           email: "james@example.com",
           phone: "(555) 987-6543",
           imageUrl: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?ixlib=rb-1.2.1&auto=format&fit=crop&w=640&h=360&q=80"
@@ -37,6 +39,7 @@ async function seed() {
           description: "Moving soon and clearing out my pantry. Various canned vegetables, beans, and soups available.",
           category: "canned",
           location: "Richmond District, San Francisco",
+          name: "Alex Chen",
           email: "alex@example.com",
           phone: "(555) 456-7890",
           imageUrl: "https://images.unsplash.com/photo-1534939561126-855b8675edd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=640&h=360&q=80"

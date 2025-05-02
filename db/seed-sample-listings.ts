@@ -186,6 +186,19 @@ function generateRandomPhone(): string {
   return `(${areaCode}) ${prefix}-${lineNumber}`;
 }
 
+// Sample first and last names for generating full names
+const firstNames = ['John', 'Jane', 'Sam', 'Alex', 'Maria', 'Chris', 'Pat', 'Jordan', 'Taylor', 'Robin', 
+                   'Avery', 'Morgan', 'Casey', 'Riley', 'Jamie', 'Quinn', 'Dakota', 'Skyler', 'Reese', 'Parker'];
+const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+                  'Lee', 'Patel', 'Kim', 'Nguyen', 'Chen', 'Wong', 'Park', 'Ali', 'Singh', 'Cohen'];
+
+// Function to generate a random full name
+function generateRandomFullName(): string {
+  const firstName = getRandomItem(firstNames);
+  const lastName = getRandomItem(lastNames);
+  return `${firstName} ${lastName}`;
+}
+
 // Function to generate a random email
 function generateRandomEmail(): string {
   const names = ['john', 'jane', 'sam', 'alex', 'maria', 'chris', 'pat', 'jordan', 'taylor', 'robin'];
@@ -218,6 +231,7 @@ async function seedSampleListings() {
         description: getRandomItem(descriptions),
         category,
         location: getRandomItem(locations),
+        name: generateRandomFullName(),
         email: generateRandomEmail(),
         phone: generateRandomPhone(),
         imageUrl: getRandomItem(sampleImageUrls)

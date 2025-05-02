@@ -19,6 +19,7 @@ export const foodListings = pgTable("food_listings", {
   description: text("description").notNull(),
   category: text("category").notNull(),
   location: text("location").notNull(),
+  name: text("name").notNull(),  // Full name of the person sharing food
   email: text("email").notNull(),
   phone: text("phone"),
   imageUrl: text("image_url"),
@@ -34,6 +35,7 @@ export const foodListingInsertSchema = createInsertSchema(foodListings, {
     "Please select a valid category"
   ),
   location: (schema) => schema.min(3, "Location must be at least 3 characters"),
+  name: (schema) => schema.min(2, "Full name must be at least 2 characters"),
   email: (schema) => schema.email("Please provide a valid email address"),
   phone: (schema) => schema.optional()
 });
@@ -47,6 +49,7 @@ export const foodListingFormSchema = z.object({
     "Please select a valid category"
   ),
   location: z.string().min(3, "Location must be at least 3 characters"),
+  name: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Please provide a valid email address"),
   phone: z.string().optional(),
   imageUrl: z.string().optional()
