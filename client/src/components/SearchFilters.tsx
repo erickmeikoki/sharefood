@@ -24,7 +24,7 @@ export default function SearchFilters({
 }: SearchFiltersProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const { favorites } = useFavorites();
+  const { favorites, favoriteIds } = useFavorites();
   
   // Debounce search input
   useEffect(() => {
@@ -42,6 +42,11 @@ export default function SearchFilters({
       onFavoritesChange(checked);
     }
   };
+  
+  // For debugging
+  useEffect(() => {
+    console.log("Favorites in SearchFilters:", favoriteIds);
+  }, [favoriteIds]);
   
   return (
     <section className="mb-8 bg-card p-4 rounded-lg shadow-sm">
@@ -114,8 +119,8 @@ export default function SearchFilters({
           </div>
         </div>
         
-        {/* Favorites filter toggle */}
-        {onFavoritesChange && favorites.length > 0 && (
+        {/* Favorites filter toggle - always show this */}
+        {onFavoritesChange && (
           <div className="flex items-center space-x-2 pt-2 border-t border-border">
             <Switch 
               id="favorites-only" 
@@ -125,7 +130,7 @@ export default function SearchFilters({
             <div className="flex items-center">
               <Heart className={`h-4 w-4 mr-2 ${showFavoritesOnly ? 'text-primary fill-primary' : 'text-muted-foreground'}`} />
               <Label htmlFor="favorites-only" className="cursor-pointer">
-                Show favorites only ({favorites.length})
+                Show favorites only {favoriteIds.length > 0 ? `(${favoriteIds.length})` : ''}
               </Label>
             </div>
           </div>
