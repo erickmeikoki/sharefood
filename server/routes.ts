@@ -71,17 +71,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all food listings with optional search/filters
+  // Get all food listings with optional search/filters and pagination
   app.get("/api/listings", async (req, res) => {
     try {
-      const { query, category } = req.query;
+      const { query, category, page, limit } = req.query;
       
-      const listings = await storage.getFoodListings({
+      // Parse pagination parameters
+      const pageNumber = typeof page === "string" ? parseInt(page) : undefined;
+      const limitNumber = typeof limit === "string" ? parseInt(limit) : undefined;
+      
+      const result = await storage.getFoodListings({
         query: typeof query === "string" ? query : undefined,
-        category: typeof category === "string" ? category : undefined
+        category: typeof category === "string" ? category : undefined,
+        page: pageNumber && !isNaN(pageNumber) ? pageNumber : 1,
+        limit: limitNumber && !isNaN(limitNumber) ? limitNumber : 10
       });
       
-      return res.status(200).json(listings);
+      return res.status(200).json(result);
     } catch (error) {
       console.error("Error getting food listings:", error);
       return res.status(500).json({ message: "Internal server error" });

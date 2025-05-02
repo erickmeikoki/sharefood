@@ -61,4 +61,17 @@ export type FoodListingForm = z.infer<typeof foodListingFormSchema>;
 export type SearchParams = {
   query?: string;
   category?: string;
+  page?: number;
+  limit?: number;
+};
+
+// Pagination result type
+export type PaginatedResult<T> = {
+  data: T[];
+  meta: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  }
 };

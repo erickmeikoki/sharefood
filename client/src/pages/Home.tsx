@@ -6,7 +6,9 @@ import Hero from "@/components/Hero";
 import SearchFilters from "@/components/SearchFilters";
 import FoodListingCard from "@/components/FoodListingCard";
 import CreateListingForm from "@/components/CreateListingForm";
-import { FoodListing } from "@shared/schema";
+import { FoodListing, PaginatedResult } from "@shared/schema";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
