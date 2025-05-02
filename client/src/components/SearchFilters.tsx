@@ -37,11 +37,14 @@ export default function SearchFilters({
     return () => clearTimeout(timer);
   }, [searchQuery, onSearch]);
   
-  // Handle favorites filter toggle
+  // Handle favorites filter toggle with more detailed logging
   const handleFavoritesToggle = (checked: boolean) => {
-    console.log('Toggling favorites filter to:', checked);
+    console.log('SearchFilters: Toggling favorites filter to:', checked);
+    console.log('SearchFilters: Current favoriteIds:', favoriteIds);
     setShowFavoritesOnly(checked);
+    
     if (onFavoritesChange) {
+      console.log('SearchFilters: Calling parent onFavoritesChange with:', checked);
       onFavoritesChange(checked);
     }
   };

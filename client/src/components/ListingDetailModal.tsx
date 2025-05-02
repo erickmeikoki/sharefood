@@ -194,10 +194,12 @@ export default function ListingDetailModal({ listing, isOpen, onClose }: Listing
                   e.stopPropagation(); 
                   console.log('Adding/removing favorite:', listing.id, 'Current state:', isFavorite(listing.id));
                   toggleFavorite(listing);
-                  // Log after toggling
+                  // Log after toggling and force rerender
                   setTimeout(() => {
                     console.log('After toggle, favorite status:', isFavorite(listing.id));
-                  }, 10);
+                    // Force rerender by changing a state
+                    setCurrentImageIndex(currentImageIndex);
+                  }, 50);
                 }}
                 className={`rounded-full ${isFavorite(listing.id) ? 'bg-primary text-white' : 'bg-black/50 text-white/70'} p-2 hover:text-white hover:bg-black/70 transition-colors`}
                 aria-label={isFavorite(listing.id) ? "Remove from favorites" : "Add to favorites"}
@@ -256,15 +258,18 @@ export default function ListingDetailModal({ listing, isOpen, onClose }: Listing
                 <Share2 className="h-5 w-5" />
               </button>
               
-              {/* Favorite button */}
+              {/* Favorite button (no image) */}
               <button 
                 onClick={(e) => { 
                   e.stopPropagation();
-                  console.log('Adding/removing favorite (no image):', listing.id);
+                  console.log('Adding/removing favorite (no image):', listing.id, 'Current state:', isFavorite(listing.id));
                   toggleFavorite(listing);
+                  // Force refresh the component after toggle
                   setTimeout(() => {
                     console.log('After toggle (no image), favorite status:', isFavorite(listing.id));
-                  }, 10);
+                    // Force rerender by changing a state
+                    setCurrentImageIndex(currentImageIndex);
+                  }, 50);
                 }}
                 className={`rounded-full p-1.5 shadow-sm border border-border ${isFavorite(listing.id) ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground'}`}
                 aria-label={isFavorite(listing.id) ? "Remove from favorites" : "Add to favorites"}

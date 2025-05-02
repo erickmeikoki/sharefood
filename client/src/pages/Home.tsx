@@ -65,28 +65,34 @@ export default function Home() {
   
   // Debug favorites
   useEffect(() => {
-    console.log("Favorites changed:", favorites);
-    console.log("Favorites toggle state:", showFavoritesOnly);
-  }, [favorites, showFavoritesOnly]);
+    console.log("Home: Favorites changed:", favoriteIds);
+    console.log("Home: Favorites toggle state:", showFavoritesOnly);
+  }, [favoriteIds, showFavoritesOnly]);
   
-  // Filter listings by favorites if needed
+  // Filter listings by favorites if needed with improved debugging
   const listings = useMemo(() => {
+    console.log("Home: Re-filtering listings with:");
+    console.log("  - showFavoritesOnly:", showFavoritesOnly);
+    console.log("  - favoriteIds:", favoriteIds);
+    console.log("  - allListings count:", allListings.length);
+    
     if (showFavoritesOnly) {
-      // Get the IDs of favorite listings
-      const favIds = favoriteIds;
-      const filtered = allListings.filter(listing => favIds.includes(listing.id));
+      // Show only favorite listings
+      if (favoriteIds.length === 0) {
+        console.log("Home: No favorites to filter, showing empty list");
+        return []; // No favorites, so return empty list
+      }
       
-      console.log("FILTERING BY FAVORITES:", {
-        showFavoritesOnly,
-        favoritesCount: favoriteIds.length,
-        beforeFilterCount: allListings.length,
-        afterFilterCount: filtered.length,
-        favoriteIds
-      });
+      // Get filtered listings
+      const filtered = allListings.filter(listing => favoriteIds.includes(listing.id));
+      
+      console.log("Home: Filtered listings:", filtered.map(l => l.id));
+      console.log("Home: Filtered from", allListings.length, "to", filtered.length, "listings");
       
       return filtered;
     }
     
+    console.log("Home: Showing all listings");
     return allListings;
   }, [allListings, showFavoritesOnly, favoriteIds]);
   
@@ -179,6 +185,8 @@ export default function Home() {
           }}
           onSortChange={handleSortChange}
           onFavoritesChange={(showFavOnly) => {
+            console.log("Home: onFavoritesChange called with:", showFavOnly);
+            console.log("Home: Current favoriteIds:", favoriteIds);
             setShowFavoritesOnly(showFavOnly);
             setCurrentPage(1); // Reset to page 1 when filter changes
           }}
@@ -271,9 +279,17 @@ export default function Home() {
               )}
               
               <div className="text-center mt-4 text-sm text-muted-foreground">
-                Showing {(pagination.currentPage - 1) * pagination.itemsPerPage + 1} to {
-                  Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)
-                } of {pagination.totalItems} food listings
+                {showFavoritesOnly ? (
+                  <span>
+                    Showing {listings.length} {listings.length === 1 ? 'favorite' : 'favorites'} out of {allListings.length} total listings
+                  </span>
+                ) : (
+                  <span>
+                    Showing {(pagination.currentPage - 1) * pagination.itemsPerPage + 1} to {
+                      Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)
+                    } of {pagination.totalItems} food listings
+                  </span>
+                )}
               </div>
             </>
           ) : (
