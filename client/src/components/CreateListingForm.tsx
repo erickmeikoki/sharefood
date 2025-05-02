@@ -150,12 +150,12 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-neutral-darkest/50 z-50 flex items-center justify-center" onClick={onClose}>
-      <div className="bg-card rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto mx-4" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-foreground/30 backdrop-blur-sm z-50 flex items-center justify-center" onClick={onClose}>
+      <div className="bg-card rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto mx-4" onClick={e => e.stopPropagation()}>
         <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-foreground">Share Your Food</h2>
-            <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-display font-semibold text-foreground">Share Your Food</h2>
+            <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors rounded-full hover:bg-muted p-1">
               <X className="h-6 w-6" />
             </button>
           </div>
@@ -256,20 +256,27 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                     />
                     
                     {/* Image Preview or Upload Area */}
-                    <div className="mt-1">
+                    <div className="mt-2">
                       {uploadedImage ? (
-                        <div className="relative w-full h-48 bg-neutral-light rounded-md overflow-hidden">
+                        <div className="relative w-full h-56 bg-muted rounded-lg overflow-hidden shadow-sm border border-border/40">
                           <img 
                             src={uploadedImage} 
                             alt="Food preview" 
                             className="w-full h-full object-cover"
+                            onError={() => {
+                              setUploadError("Image failed to load. Please try another URL or upload a different image.");
+                              setUploadedImage(null);
+                              form.setValue("imageUrl", "");
+                            }}
                           />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
                           <button
                             type="button"
-                            className="absolute top-2 right-2 bg-card p-1 rounded-full shadow-sm border border-border"
+                            className="absolute top-3 right-3 bg-card p-1.5 rounded-full shadow-md border border-border hover:bg-destructive hover:text-destructive-foreground transition-colors"
                             onClick={() => {
                               setUploadedImage(null);
                               form.setValue("imageUrl", "");
+                              setUploadError(null);
                             }}
                           >
                             <X className="h-4 w-4" />
@@ -277,21 +284,27 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                         </div>
                       ) : (
                         <div 
-                          className="border-2 border-dashed border-border bg-card rounded-md p-8 text-center cursor-pointer"
+                          className="border-2 border-dashed border-border hover:border-primary/50 bg-card hover:bg-muted/50 rounded-lg p-8 text-center cursor-pointer transition-colors duration-200"
                           onClick={() => fileInputRef.current?.click()}
                         >
                           {isUploading ? (
-                            <div className="flex flex-col items-center justify-center">
-                              <Loader2 className="h-10 w-10 text-primary animate-spin mb-2" />
-                              <p className="text-muted-foreground text-sm">Uploading image...</p>
+                            <div className="flex flex-col items-center justify-center py-4">
+                              <Loader2 className="h-12 w-12 text-primary animate-spin mb-3" />
+                              <p className="text-foreground font-medium">Processing image...</p>
+                              <p className="text-muted-foreground text-sm mt-1">This may take a moment</p>
                             </div>
                           ) : (
-                            <div className="flex flex-col items-center justify-center">
-                              <Image className="h-10 w-10 text-muted-foreground mb-2" />
-                              <p className="text-muted-foreground text-sm">
-                                Click to upload an image of your food
+                            <div className="flex flex-col items-center justify-center py-4">
+                              <div className="bg-primary/10 p-3 rounded-full mb-3">
+                                <Image className="h-10 w-10 text-primary" />
+                              </div>
+                              <p className="text-foreground font-medium">
+                                Add a photo of your food
                               </p>
-                              <p className="text-xs text-muted-foreground mt-1">
+                              <p className="text-muted-foreground text-sm mt-2 max-w-xs">
+                                Photos help others see what you're sharing and increases the chance of your food being claimed
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-3 bg-muted px-2 py-1 rounded-md">
                                 JPG, PNG, WebP up to 5MB
                               </p>
                             </div>
@@ -302,27 +315,58 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                     
                     {/* Display upload error if any */}
                     {uploadError && (
-                      <Alert variant="destructive" className="mt-2">
-                        <AlertDescription>{uploadError}</AlertDescription>
+                      <Alert variant="destructive" className="mt-3">
+                        <AlertDescription className="flex items-center text-sm py-1">{uploadError}</AlertDescription>
                       </Alert>
                     )}
                     
                     {/* Manual URL Input Option */}
-                    {!uploadedImage && (
-                      <div className="mt-2">
-                        <p className="text-xs text-muted-foreground mb-1">
-                          Or enter an image URL manually:
-                        </p>
-                        <Input 
-                          placeholder="https://example.com/image.jpg" 
-                          value={field.value}
-                          onChange={(e) => {
-                            field.onChange(e.target.value);
-                            if (e.target.value) {
-                              setUploadedImage(e.target.value);
-                            }
-                          }}
-                        />
+                    {!uploadedImage && !isUploading && (
+                      <div className="mt-3">
+                        <div className="flex items-center">
+                          <div className="h-px flex-1 bg-border"></div>
+                          <p className="text-xs text-muted-foreground mx-2 font-medium">OR</p>
+                          <div className="h-px flex-1 bg-border"></div>
+                        </div>
+                        
+                        <div className="mt-3">
+                          <p className="text-sm text-foreground font-medium mb-2">
+                            Enter an image URL:
+                          </p>
+                          <div className="relative">
+                            <Input 
+                              placeholder="https://example.com/food-image.jpg" 
+                              value={field.value}
+                              onChange={(e) => {
+                                const url = e.target.value.trim();
+                                field.onChange(url);
+                                setUploadError(null);
+                                
+                                if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+                                  setUploadedImage(url);
+                                } else if (url) {
+                                  setUploadError("Please enter a valid image URL starting with http:// or https://");
+                                }
+                              }}
+                              className="pr-10"
+                            />
+                            {field.value && (
+                              <button 
+                                type="button"
+                                onClick={() => {
+                                  field.onChange("");
+                                  setUploadError(null);
+                                }}
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1.5">
+                            Links should be direct URLs to images (.jpg, .png, .webp)
+                          </p>
+                        </div>
                       </div>
                     )}
                     <FormMessage />
@@ -330,8 +374,15 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                 )}
               />
               
-              <div className="border-t border-border pt-4">
-                <h3 className="text-lg font-bold text-foreground mb-3">Contact Information</h3>
+              <div className="border-t border-border pt-5 mt-2">
+                <h3 className="text-lg font-display font-semibold text-foreground mb-4">Contact Information</h3>
+                
+                <div className="bg-muted/50 p-4 rounded-lg mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    Your contact information will be visible to anyone viewing your listing.
+                    This allows interested people to reach out about the food you're sharing.
+                  </p>
+                </div>
                 
                 <FormField
                   control={form.control}
@@ -344,6 +395,7 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                           type="email" 
                           placeholder="youremail@example.com" 
                           {...field} 
+                          className="focus-visible:ring-primary"
                         />
                       </FormControl>
                       <FormMessage />
@@ -362,6 +414,7 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                           type="tel" 
                           placeholder="(555) 123-4567" 
                           {...field} 
+                          className="focus-visible:ring-primary"
                         />
                       </FormControl>
                       <FormMessage />
@@ -370,13 +423,20 @@ export default function CreateListingForm({ isOpen, onClose }: CreateListingForm
                 />
               </div>
               
-              <div className="pt-2">
+              <div className="pt-4 mt-2">
                 <Button 
                   type="submit"
-                  className="w-full bg-primary hover:bg-primary-dark" 
+                  className="w-full bg-primary hover:bg-primary-dark text-white font-medium text-base py-6 shadow-lg hover:shadow-xl transition-all" 
                   disabled={createListingMutation.isPending}
                 >
-                  {createListingMutation.isPending ? "Creating..." : "Create Listing"}
+                  {createListingMutation.isPending ? (
+                    <span className="flex items-center">
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      Creating Listing...
+                    </span>
+                  ) : (
+                    "Share Your Food"
+                  )}
                 </Button>
               </div>
             </form>
