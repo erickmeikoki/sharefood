@@ -22,7 +22,8 @@ export const foodListings = pgTable("food_listings", {
   name: text("name").notNull(),  // Full name of the person sharing food
   email: text("email").notNull(),
   phone: text("phone"),
-  imageUrl: text("image_url"),
+  imageUrl: text("image_url"), // Main image (keep for backwards compatibility)
+  imageUrls: json("image_urls").$type<string[]>().default([]), // Array of image URLs
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
@@ -52,7 +53,8 @@ export const foodListingFormSchema = z.object({
   name: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Please provide a valid email address"),
   phone: z.string().optional(),
-  imageUrl: z.string().optional()
+  imageUrl: z.string().optional(),
+  imageUrls: z.array(z.string()).optional()
 });
 
 // Types

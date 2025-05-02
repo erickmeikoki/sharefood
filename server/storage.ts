@@ -11,8 +11,29 @@ import { eq, and, desc, asc, ilike, or, count, sql } from "drizzle-orm";
 export const storage = {
   // Create a new food listing
   async createFoodListing(listing: InsertFoodListing): Promise<FoodListing> {
+    // Ensure imageUrls is properly handled
+    if (!listing.imageUrls) {
+      // If no imageUrls, set as empty array
+      listing.imageUrls = [];
+    }
+    
+    if (listing.imageUrl && !listing.imageUrls.includes(listing.imageUrl)) {
+      // If imageUrl exists but not in imageUrls, add it to the array
+      listing.imageUrls.push(listing.imageUrl);
+    }
+    
     const [newListing] = await db.insert(foodListings)
-      .values(listing)
+      .values({
+        title: listing.title,
+        description: listing.description,
+        category: listing.category,
+        location: listing.location,
+        name: listing.name,
+        email: listing.email,
+        phone: listing.phone,
+        imageUrl: listing.imageUrl,
+        imageUrls: listing.imageUrls
+      })
       .returning();
     
     return newListing;
