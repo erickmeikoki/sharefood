@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,12 +10,15 @@ import ListingDetailModal from "@/components/ListingDetailModal";
 import { FoodListing, PaginatedResult } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useFavorites } from "@/hooks/use-favorites";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedListing, setSelectedListing] = useState<FoodListing | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const { favorites, isFavorite } = useFavorites();
   const [searchParams, setSearchParams] = useState({
     query: "",
     category: "",
@@ -58,13 +61,39 @@ export default function Home() {
   });
   
   // Extract listings and pagination meta data
-  const listings = paginatedResult?.data || [];
-  const pagination = paginatedResult?.meta || {
-    currentPage: 1,
-    totalPages: 1,
-    totalItems: 0,
-    itemsPerPage: searchParams.limit
-  };
+  const allListings = paginatedResult?.data || [];
+  
+  // Filter listings by favorites if needed
+  const listings = useMemo(() => {
+    if (showFavoritesOnly && favorites.length > 0) {
+      return allListings.filter(listing => isFavorite(listing.id));
+    }
+    return allListings;
+  }, [allListings, showFavoritesOnly, favorites, isFavorite]);
+  
+  // Calculate pagination based on filtered results
+  const pagination = useMemo(() => {
+    if (showFavoritesOnly && paginatedResult?.meta) {
+      const totalItems = listings.length;
+      const itemsPerPage = paginatedResult.meta.itemsPerPage;
+      const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+      const currentPage = Math.min(searchParams.page, totalPages);
+      
+      return {
+        currentPage,
+        totalPages,
+        totalItems,
+        itemsPerPage
+      };
+    }
+    
+    return paginatedResult?.meta || {
+      currentPage: 1,
+      totalPages: 1,
+      totalItems: 0,
+      itemsPerPage: searchParams.limit
+    };
+  }, [paginatedResult, listings, showFavoritesOnly, searchParams.page, searchParams.limit]);
   
   // Handle page change
   const handlePageChange = (newPage: number) => {
@@ -130,6 +159,10 @@ export default function Home() {
             setCurrentPage(1);
           }}
           onSortChange={handleSortChange}
+          onFavoritesChange={(showFavOnly) => {
+            setShowFavoritesOnly(showFavOnly);
+            setCurrentPage(1); // Reset to page 1 when filter changes
+          }}
         />
         
         <section className="mb-12">
@@ -228,9 +261,11 @@ export default function Home() {
             <div className="text-center py-12 bg-card rounded-lg shadow-sm">
               <h3 className="text-xl font-semibold mb-2">No food listings found</h3>
               <p className="text-muted-foreground mb-6">
-                {searchParams.query || searchParams.category 
-                  ? "Try adjusting your search filters" 
-                  : "Be the first to share food with your community!"}
+                {showFavoritesOnly
+                  ? "You haven't added any favorites yet. Browse listings and click the heart icon to add favorites!"
+                  : searchParams.query || searchParams.category 
+                    ? "Try adjusting your search filters" 
+                    : "Be the first to share food with your community!"}
               </p>
               <button 
                 onClick={handleOpenModal}
