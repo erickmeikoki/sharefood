@@ -91,7 +91,26 @@ export default function Home() {
   
   // Handle sort change
   const handleSortChange = (sortOption: SortOption) => {
-    setSearchParams(prev => ({ ...prev, sortBy: sortOption }));
+    if (sortOption === 'default') {
+      // If default is selected, set an empty sortBy
+      setSearchParams(prev => ({
+        query: prev.query,
+        category: prev.category,
+        page: 1, // Reset to page 1 when sort changes
+        limit: prev.limit,
+        sortBy: ''
+      }));
+    } else {
+      // Otherwise, use the selected sort option
+      setSearchParams(prev => ({
+        query: prev.query,
+        category: prev.category,
+        page: 1, // Reset to page 1 when sort changes
+        limit: prev.limit,
+        sortBy: sortOption
+      }));
+    }
+    setCurrentPage(1);
   };
   
   return (

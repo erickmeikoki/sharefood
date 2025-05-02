@@ -57,40 +57,55 @@ export const storage = {
     const totalItems = countResult[0] ? countResult[0].value : 0;
     const totalPages = Math.ceil(totalItems / limit);
     
-    // Get data with pagination and filters
-    let query = db.select().from(foodListings);
+    // Build the query
+    let orderByField, orderDirection;
     
-    // Apply conditions if any
-    if (conditions) {
-      query = query.where(conditions);
+    // Determine sort order
+    if (params.sortBy === 'oldest') {
+      orderByField = foodListings.createdAt;
+      orderDirection = 'asc';
+    } else if (params.sortBy === 'alphabetical') {
+      orderByField = foodListings.title;
+      orderDirection = 'asc';
+    } else {
+      // Default or 'newest'
+      orderByField = foodListings.createdAt;
+      orderDirection = 'desc';
     }
     
-    // Apply sorting
-    if (params.sortBy) {
-      switch(params.sortBy) {
-        case 'newest':
-          query = query.orderBy(desc(foodListings.createdAt));
-          break;
-        case 'oldest':
-          query = query.orderBy(asc(foodListings.createdAt));
-          break;
-        case 'alphabetical':
-          query = query.orderBy(asc(foodListings.title));
-          break;
-        default:
-          // Default sort by newest
-          query = query.orderBy(desc(foodListings.createdAt));
+    // Execute query with all options
+    let data;
+    if (conditions) {
+      if (orderDirection === 'asc') {
+        data = await db.select()
+          .from(foodListings)
+          .where(conditions)
+          .orderBy(asc(orderByField))
+          .limit(limit)
+          .offset(offset);
+      } else {
+        data = await db.select()
+          .from(foodListings)
+          .where(conditions)
+          .orderBy(desc(orderByField))
+          .limit(limit)
+          .offset(offset);
       }
     } else {
-      // Default sort by newest
-      query = query.orderBy(desc(foodListings.createdAt));
+      if (orderDirection === 'asc') {
+        data = await db.select()
+          .from(foodListings)
+          .orderBy(asc(orderByField))
+          .limit(limit)
+          .offset(offset);
+      } else {
+        data = await db.select()
+          .from(foodListings)
+          .orderBy(desc(orderByField))
+          .limit(limit)
+          .offset(offset);
+      }
     }
-    
-    // Apply pagination
-    query = query.limit(limit).offset(offset);
-    
-    // Execute query
-    const data = await query;
     
     // Return paginated result
     return {
